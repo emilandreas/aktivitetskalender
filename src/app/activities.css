@@ -1,0 +1,35 @@
+/* Table container to center it */
+.table-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh; /* Make the table container fill the entire height of the screen */
+    background-color: #f4f4f4; /* Background color for better visibility */
+  }
+  
+  table {
+    border-collapse: collapse; /* Ensures that the borders are collapsed together */
+    margin-right: 20px 0; /* Adds some spacing around the table */
+    margin-left: 20px 0; /* Adds some spacing around the table */
+  }
+  .nopad{
+    padding:0;
+  }
+  th, td {
+    padding: 12px 20px; /* Adds padding inside table cells */
+    text-align: center; /* Centers the content inside cells */
+    border: 1px solid #ddd; /* Light gray border for cells */
+  }
+  
+  th {
+    background-color: #c26e00dc; /* Green background for header */
+    color: white; /* White text color for the header */
+  }
+  
+  tr:nth-child(even) {
+    background-color: #2c2c2c; /* Adds alternating row colors for better readability */
+  }
+  
+  tr:hover {
+    background-color: #221900; /* Change the background color when hovering over a row */
+  }
