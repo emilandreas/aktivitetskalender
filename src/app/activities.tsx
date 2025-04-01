@@ -21,9 +21,6 @@ export default function Activities( props:any){
           // Filter running activities and sort by distance in descending order
           const scores = data.athleteDisplays
             .sort((a:any , b:any) => b.score - a.score);
-          for(let i = 0; i < 50; i++){
-            scores.push(data.athleteDisplays[0]);
-          }
           setDetails(data.details);
           setScoreboard(scores);
         } catch (error) {

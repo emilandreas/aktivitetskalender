@@ -3,13 +3,19 @@ import { redirect } from 'next/navigation'
 
 import { Pool } from "pg";
 
+// const pool = new Pool({
+//   user: 'postgres',
+//   password: 'mypass',
+//   host: 'localhost',
+//   port: 5432,
+//   database: 'aktivitetskalender',
+// });
 const pool = new Pool({
-  user: 'postgres',
-  password: 'mypass',
-  host: 'localhost',
-  port: 5432,
-  database: 'aktivitetskalender',
-});
+    connectionString: process.env.DATABASE_URL,
+    ssl: {
+      rejectUnauthorized: false, // Required for Neon
+    },
+  });
 
 export async function GET(request: Request) {
     const { searchParams } = new URL(request.url);

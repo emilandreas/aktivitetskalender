@@ -9,23 +9,27 @@ let accessToken = process.env.STRAVA_ACCESS_TOKEN;
 let refreshToken = process.env.STRAVA_REFRESH_TOKEN;
 let expiresAt = parseInt(process.env.STRAVA_EXPIRES_AT??"0"); // Unix timestamp
 expiresAt =  Math.floor(Date.now() / 1000) -1;
-const AFTER_DATE = Math.floor(new Date('2024-03-01').getTime() / 1000); // Unix timestamp format
-
+const AFTER_DATE = process.env.STRAVA_ACTIVITIES_AFTER ?? "2025-04-01T00:00:00Z"
+const INTERVAL: number = +(process.env.STRAVA_FETCH_INTERVAL ?? 1000);
 
 let lastActivityDataUpdate = 0;
 
-let activityData: string;
-const CLUB_ID = "teleplan_no"
-
 
 import { Pool } from "pg";
+// const pool = new Pool({
+//   user: 'postgres',
+//   password: 'mypass',
+//   host: 'localhost',
+//   port: 5432,
+//   database: 'aktivitetskalender',
+// });
 const pool = new Pool({
-  user: 'postgres',
-  password: 'mypass',
-  host: 'localhost',
-  port: 5432,
-  database: 'aktivitetskalender',
+  connectionString: process.env.DATABASE_URL,
+  ssl: {
+    rejectUnauthorized: false, // Required for Neon
+  },
 });
+
 
 
 async function refreshAccessToken(user: User): Promise<string> {
@@ -39,7 +43,7 @@ async function refreshAccessToken(user: User): Promise<string> {
   const { access_token, refresh_token, expires_at } = response.data;
   
   await pool.query(
-    'UPDATE users SET strava_access_token = $1, strava_refresh_token = $2, strava_token_expires_at = $3 WHERE id = $4',
+    'UPDATE users SET access_token = $1, refresh_token = $2, expires_at = $3 WHERE id = $4',
     [access_token, refresh_token, expires_at, user.id]
   );
 
@@ -58,7 +62,7 @@ async function fetchStravaActivities(user:User) {
     const response = await axios.get('https://www.strava.com/api/v3/athlete/activities', {
       headers: { Authorization: `Bearer ${accessToken}` },
       params:{
-        after:Math.floor(new Date('2025-01-07T09:44:33Z').getTime()/1000),
+        after:Math.floor(new Date(AFTER_DATE).getTime()/1000),
         per_page:200
       }
 
@@ -74,12 +78,14 @@ let LAST_FETCH_TIME: number = 0;
 
 async function refreshActivityData(){
   const res = await pool.query('SELECT id, firstname, lastname, access_token, refresh_token, expires_at, profile_img_link FROM users');
-  console.log("user: ", res)
+  console.log("user: ", res.rows)
   let athleteScores: Array<AthleteDisplay>= [];
   let all_total_km = 0;
   let all_total_score = 0;
   for (const user of res.rows) {
     let activityData: Array<any> = await fetchStravaActivities(user);
+    if(!activityData) continue;
+
     let score = 0;
     let numActivities = 0
     let total_km = 0;
@@ -114,9 +120,8 @@ async function refreshActivityData(){
 
 export async function GET(request: Request) {
   try {
-    const interval = 10*60*1000; // ms
     const now = Date.now();
-    if(CACHED_ACTIVITY_DATA && (now - LAST_FETCH_TIME < interval)){
+    if(CACHED_ACTIVITY_DATA && (now - LAST_FETCH_TIME < INTERVAL)){
       console.log("Returning cached data");
       return new Response(JSON.stringify(CACHED_ACTIVITY_DATA), {
         status:200,
