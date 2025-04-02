@@ -5,24 +5,17 @@ import axios from "axios";
 
 const STRAVA_CLIENT_ID = process.env.STRAVA_CLIENT_ID;
 const STRAVA_CLIENT_SECRET = process.env.STRAVA_CLIENT_SECRET;
-let accessToken = process.env.STRAVA_ACCESS_TOKEN;
-let refreshToken = process.env.STRAVA_REFRESH_TOKEN;
-let expiresAt = parseInt(process.env.STRAVA_EXPIRES_AT??"0"); // Unix timestamp
-expiresAt =  Math.floor(Date.now() / 1000) -1;
 const AFTER_DATE = process.env.STRAVA_ACTIVITIES_AFTER ?? "2025-04-01T00:00:00Z"
 const INTERVAL: number = +(process.env.STRAVA_FETCH_INTERVAL ?? 1000);
 
-let lastActivityDataUpdate = 0;
+let CACHED_ACTIVITY_DATA: ResponseObject;
+export const GLOBAL = {
+  LAST_FETCH_TIME : 0
+}
 
 
 import { Pool } from "pg";
-// const pool = new Pool({
-//   user: 'postgres',
-//   password: 'mypass',
-//   host: 'localhost',
-//   port: 5432,
-//   database: 'aktivitetskalender',
-// });
+
 const pool = new Pool({
   connectionString: process.env.DATABASE_URL,
   ssl: {
@@ -73,9 +66,6 @@ async function fetchStravaActivities(user:User) {
   }
 }
 
-let CACHED_ACTIVITY_DATA: ResponseObject;
-let LAST_FETCH_TIME: number = 0;
-
 async function refreshActivityData(){
   const res = await pool.query('SELECT id, firstname, lastname, access_token, refresh_token, expires_at, profile_img_link FROM users');
   console.log("user: ", res.rows)
@@ -121,7 +111,8 @@ async function refreshActivityData(){
 export async function GET(request: Request) {
   try {
     const now = Date.now();
-    if(CACHED_ACTIVITY_DATA && (now - LAST_FETCH_TIME < INTERVAL)){
+    console.log("now: ", now, " lastFetch: ", GLOBAL.LAST_FETCH_TIME, " Interval: ", INTERVAL)
+    if(CACHED_ACTIVITY_DATA && (now - GLOBAL.LAST_FETCH_TIME < INTERVAL)){
       console.log("Returning cached data");
       return new Response(JSON.stringify(CACHED_ACTIVITY_DATA), {
         status:200,
@@ -134,6 +125,7 @@ export async function GET(request: Request) {
       else{
         console.log("Returning new data")
         CACHED_ACTIVITY_DATA  = newData;
+        GLOBAL.LAST_FETCH_TIME = now;
         return new Response(JSON.stringify(CACHED_ACTIVITY_DATA), {
           status:200,
           headers: { 'Content-Type': 'application/json' }

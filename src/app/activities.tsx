@@ -17,7 +17,7 @@ export default function Activities( props:any){
             `/api/activities`
           );
           const data: ResponseObject = await response.json();
-          console.log(data)
+
           // Filter running activities and sort by distance in descending order
           const scores = data.athleteDisplays
             .sort((a:any , b:any) => b.score - a.score);
@@ -48,7 +48,7 @@ export default function Activities( props:any){
         <br></br>
         <div>
         Premieprogresjon [kr]: 0 <progress value={progress()}/> 7500  &nbsp;&nbsp;    
-        Total poengsum: {details?.total_score.toFixed(2)}
+        Total poengsum: {details?.total_score.toFixed(2)}/15000
         </div>
         <table>
           <thead>

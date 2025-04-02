@@ -1,6 +1,6 @@
 import axios from 'axios';
 import { redirect } from 'next/navigation'
-
+import { GLOBAL } from '@/app/api/activities/route';
 import { Pool } from "pg";
 
 // const pool = new Pool({
@@ -35,6 +35,8 @@ export async function GET(request: Request) {
             code: code,
             grant_type: "authorization_code",
         };
+        const url = `https://www.strava.com/oauth/token?client_id=${process.env.STRAVA_CLIENT_ID}&client_secret=${process.env.STRAVA_CLIENT_SECRET}&code=${code}&grant_type=authorization_code`;
+        console.log(url);
         const response = await axios.post(`https://www.strava.com/oauth/token?client_id=${process.env.STRAVA_CLIENT_ID}&client_secret=${process.env.STRAVA_CLIENT_SECRET}&code=${code}&grant_type=authorization_code`);
 
      const { access_token, refresh_token, expires_at, athlete } = response.data;
@@ -54,6 +56,7 @@ export async function GET(request: Request) {
             status:500
           });
     }finally{
+        GLOBAL.LAST_FETCH_TIME = 0; // Force refresh of data
         redirect("/");
     }
 }
