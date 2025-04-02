@@ -1,6 +1,6 @@
 import axios from 'axios';
 import { redirect } from 'next/navigation'
-import { GLOBAL } from '@/app/api/activities/route';
+import { GLOBAL} from "@/app/api/global"
 import { Pool } from "pg";
 
 // const pool = new Pool({

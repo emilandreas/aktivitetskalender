@@ -1,5 +1,5 @@
 import {User, AthleteDisplay, ResponseObject, CompetitionDetails} from "../../interfaces"
-import pg from 'pg';
+import { GLOBAL} from "@/app/api/global"
 
 import axios from "axios";
 
@@ -9,10 +9,6 @@ const AFTER_DATE = process.env.STRAVA_ACTIVITIES_AFTER ?? "2025-04-01T00:00:00Z"
 const INTERVAL: number = +(process.env.STRAVA_FETCH_INTERVAL ?? 1000);
 
 let CACHED_ACTIVITY_DATA: ResponseObject;
-export const GLOBAL = {
-  LAST_FETCH_TIME : 0
-}
-
 
 import { Pool } from "pg";
 
