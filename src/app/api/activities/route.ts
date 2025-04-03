@@ -142,6 +142,7 @@ const CONVERT = {
   running: 1,
   walking: 1,
   ride: 1/3,
+  virtual_ride: 1/2,
   e_ride: 1/8,
   ski: 1/3,
   row: 1/1.25,
@@ -161,6 +162,7 @@ function convertToScore(activity: any):number{
     case "Hike":
       return CONVERT.walking * dist + height*2;
     case "VirtualRide":
+      return CONVERT.virtual_ride;
     case "Ride":
     case "Mountain Bike Ride":
     case "Gravel Ride":

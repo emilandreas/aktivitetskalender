@@ -38,5 +38,6 @@
     background-color: #221900; /* Change the background color when hovering over a row */
   }
   .profile-pic{
+    max-height: 50px;
     background: url("../../public/teleplan_globe_logo.jpg");
   }
