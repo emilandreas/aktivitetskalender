@@ -65,33 +65,34 @@ async function fetchStravaActivities(user:User) {
 async function refreshActivityData(){
   const res = await pool.query('SELECT id, firstname, lastname, access_token, refresh_token, expires_at, profile_img_link FROM users');
   console.log("user: ", res.rows)
-  let athleteScores: Array<AthleteDisplay>= [];
   let all_total_km = 0;
   let all_total_score = 0;
-  for (const user of res.rows) {
-    let activityData: Array<any> = await fetchStravaActivities(user);
-    if(!activityData) continue;
+  const athletePromises = res.rows.map(async (user) => {
+    const activityData = await fetchStravaActivities(user);
 
     let score = 0;
-    let numActivities = 0
     let total_km = 0;
-    activityData.forEach((a)=>{
+    let numActivities = activityData.length;
+
+    activityData.forEach((a) => {
       score += convertToScore(a);
-      total_km += a.distance/1000;
-      numActivities+=1;
-    })
-    let ad:AthleteDisplay = {
+      total_km += a.distance / 1000;
+    });
+
+    all_total_km += total_km;
+    all_total_score += score;
+
+    return {
       firstname: user.firstname,
       lastname: user.lastname,
       username: user.username,
       img: user.profile_img_link,
       number_of_activities: numActivities,
-      score: score
-    }
-    athleteScores.push(ad)
-    all_total_km += total_km;
-    all_total_score += score;
-  }
+      score: score,
+    } as AthleteDisplay;
+  });
+
+  const athleteScores: Array<AthleteDisplay> = (await Promise.all(athletePromises)).filter(Boolean);
   let responseObj: ResponseObject = {
     athleteDisplays: athleteScores,
     details: {
@@ -142,40 +143,63 @@ const CONVERT = {
   running: 1,
   walking: 1,
   ride: 1/3,
-  virtual_ride: 1/2,
+  virtual_ride: 1/3,
   e_ride: 1/8,
   ski: 1/3,
   row: 1/1.25,
   swim: 4,
 }
 
+function isDoubleDate(stravaDate: string):boolean{
+  const activityDate = new Date(stravaDate).toISOString().split("T")[0];
+
+  const doubleDates = [
+    "2025-04-01",
+    "2025-04-02",
+    "2025-04-08",
+    "2025-04-26",
+    "2025-05-10",
+  ]
+  const normalizedDates = doubleDates.map(date => new Date(date).toISOString().split("T")[0]);
+  return normalizedDates.includes(activityDate);
+}
+
 function convertToScore(activity: any):number{
   const dist = activity.distance / 1000;
   const height = activity.total_elevation_gain/1000;
   const type = activity.type;
+  const scale = isDoubleDate(activity.start_date_local) ? 2: 1;
+  let score = 0;
   switch(type){
     case "Run":
     case "VirtualRun":
     case "Elliptical":
-      return CONVERT.running * dist;
+      score = CONVERT.running * dist + height*2;
+      break;
     case "Walk":
     case "Hike":
-      return CONVERT.walking * dist + height*2;
+      score =  CONVERT.walking * dist + height*2;
+      break;
     case "VirtualRide":
-      return CONVERT.virtual_ride;
+      score =  CONVERT.virtual_ride;
+      break;
     case "Ride":
     case "Mountain Bike Ride":
     case "Gravel Ride":
-      return CONVERT.ride*dist;
+      score = CONVERT.ride*dist + (height*2)*CONVERT.ride;
+      break;
     case "EBikeRide":
-      return CONVERT.e_ride*dist;
-
+      score =  CONVERT.e_ride*dist;
+      break;
     case "NordicSki":
-      return CONVERT.ski*dist;
+      score =  CONVERT.ski*dist;
+      break;
     case "Rowing":
-      return CONVERT.row*dist;
+      score = CONVERT.row*dist;
+      break;
     case "Swim":
-      return CONVERT.swim*dist;
+      score = CONVERT.swim*dist;
+      break;
     case "Snowshoe":
     case "IceSkate":
     case "AlpineSki":
@@ -190,6 +214,9 @@ function convertToScore(activity: any):number{
     case "Surf":
     case "Windsurf":
     default:
-      return 5;
-  }
+      score =  5;
+      break;
+  }    
+  return score*scale;
+
 }

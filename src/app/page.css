@@ -7,3 +7,15 @@
     padding-right: 15px;
     border-radius: 15px;
 }
+.infoBox {
+    position: fixed;
+    right: 30px;
+    top:30px;
+    border-color: white;
+    border-width: 3px;
+    border-radius: 15px;
+    padding-left: 15px;
+    padding-right: 15px;
+    border-radius: 15px;
+}
+
