@@ -6,6 +6,10 @@
     height: 100vh; /* Make the table container fill the entire height of the screen */
     background-color: #f4f4f4; /* Background color for better visibility */
   }
+
+  .header {
+    font-size: 2em !important;
+  }
   
   table {
     border-collapse: collapse; /* Ensures that the borders are collapsed together */
@@ -32,4 +36,7 @@
   
   tr:hover {
     background-color: #221900; /* Change the background color when hovering over a row */
+  }
+  .profile-pic{
+    background: url("../../public/teleplan_globe_logo.jpg");
   }

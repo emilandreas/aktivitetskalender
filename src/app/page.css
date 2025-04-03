@@ -2,4 +2,8 @@
     position: fixed;
     left: 30px;
     top:30px;
+    background-color: orangered;
+    padding-left: 15px;
+    padding-right: 15px;
+    border-radius: 15px;
 }

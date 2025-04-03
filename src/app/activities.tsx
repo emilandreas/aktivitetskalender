@@ -44,7 +44,7 @@ export default function Activities( props:any){
   
     return (
       <div>
-        <h1 className=""><b>Leaderboard</b></h1>
+        <h1 className="header"><b>Leaderboard</b></h1>
         <br></br>
         <div>
         Premieprogresjon [kr]: 0 <progress value={progress()}/> 7500  &nbsp;&nbsp;    
@@ -62,7 +62,7 @@ export default function Activities( props:any){
           <tbody>
             {scoreboard.map((activity:AthleteDisplay) => (
               <tr key={activity.firstname+activity.lastname}>
-                <td className="nopad"><img src={activity.img}/></td>
+                <td className="nopad"><img src={activity.img} className="profile-pic"/></td>
                 <td>{activity.firstname} {activity.lastname}</td>
                 <td>{activity.number_of_activities} </td>
                 <td>{(activity.score).toFixed(2)}</td>
