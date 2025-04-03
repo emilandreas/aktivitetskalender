@@ -74,7 +74,7 @@ async function refreshActivityData(){
     let total_km = 0;
     let numActivities = activityData.length;
 
-    activityData.forEach((a) => {
+    activityData.forEach((a:any) => {
       score += convertToScore(a);
       total_km += a.distance / 1000;
     });
