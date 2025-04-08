@@ -63,7 +63,7 @@ export default function Activities( props:any){
           <tbody>
             {scoreboard.map((activity:AthleteDisplay, index: number) => (
               <tr key={activity.firstname+activity.lastname}>
-                <td>{index}</td>
+                <td>{index+1}</td>
                 <td className="nopad"><img src={activity.img} className="profile-pic"/></td>
                 <td>{activity.firstname} {activity.lastname}</td>
                 <td>{activity.number_of_activities} </td>

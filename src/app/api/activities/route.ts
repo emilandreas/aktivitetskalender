@@ -181,17 +181,19 @@ function convertToScore(activity: any):number{
       score =  CONVERT.walking * dist + height*2;
       break;
     case "VirtualRide":
-      score =  CONVERT.virtual_ride;
+      score =  CONVERT.virtual_ride*dist;
       break;
     case "Ride":
     case "Mountain Bike Ride":
     case "Gravel Ride":
-      score = CONVERT.ride*dist + (height*2)*CONVERT.ride;
+      score = CONVERT.ride*(dist + (height*2) );
       break;
     case "EBikeRide":
       score =  CONVERT.e_ride*dist;
       break;
     case "NordicSki":
+    case "RollerSki":
+
       score =  CONVERT.ski*dist;
       break;
     case "Rowing":
@@ -213,8 +215,11 @@ function convertToScore(activity: any):number{
     case "StandUpPaddling":
     case "Surf":
     case "Windsurf":
-    default:
-      score =  5;
+    case "RockClimbing":
+    case "RollerSki":
+    case "WeightTraining":
+    case "Workout":
+      score = 5;
       break;
   }    
   return score*scale;
