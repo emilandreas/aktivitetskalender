@@ -148,6 +148,7 @@ const CONVERT = {
   ski: 1/3,
   row: 1/1.25,
   swim: 4,
+  kayak: 1,
 }
 
 function isDoubleDate(stravaDate: string):boolean{
@@ -202,21 +203,24 @@ function convertToScore(activity: any):number{
     case "Swim":
       score = CONVERT.swim*dist;
       break;
+    case "Canoe":
+    case "Kayaking":
+      score = CONVERT.kayak*dist;
+      break;
     case "Snowshoe":
+      score = CONVERT.walking*dist;
+      break;
     case "IceSkate":
     case "AlpineSki":
     case "BackcountrySki":
 
     case "Snowboard":
-    case "Canoe":
-    case "Kayak":
     case "Kitesurf":
    
     case "StandUpPaddling":
     case "Surf":
     case "Windsurf":
     case "RockClimbing":
-    case "RollerSki":
     case "WeightTraining":
     case "Workout":
       score = 5;
