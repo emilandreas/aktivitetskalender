@@ -63,6 +63,8 @@ async function fetchStravaActivities(user:User) {
     console.error(`Failed to fetch activities for user ${user.id}:`, error.response?.data || error.message);
   }
 }
+let maxDist = 0;
+let maxDistName = "";
 
 async function refreshActivityData(){
   const res = await pool.query('SELECT id, firstname, lastname, access_token, refresh_token, expires_at, profile_img_link FROM users');
@@ -81,6 +83,10 @@ async function refreshActivityData(){
       score += convertToScore(a);
       km_score += convertToScoreKM(a);
       total_km += a.distance / 1000;
+      if(a.distance/1000 > maxDist){
+        maxDist = a.distance/1000;
+        maxDistName = user.firstname + " " + user.lastname;
+      }
     });
 
     all_total_km += total_km;
@@ -103,6 +109,8 @@ async function refreshActivityData(){
 
   const athleteScores: Array<AthleteDisplay> = (await Promise.all(athletePromises)).filter(Boolean);
 
+  console.log("max: " + maxDistName);
+  console.log(maxDist)
 
   let responseObj: ResponseObject = {
     athleteDisplays: athleteScores,
@@ -234,6 +242,7 @@ function convertToScore(activity: any):number{
     case "RockClimbing":
     case "WeightTraining":
     case "Workout":
+    case "Soccer":
       score = 5;
       break;
   }    
