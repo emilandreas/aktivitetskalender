@@ -37,7 +37,7 @@ export default function Home() {
           Lengste aktivitet fullført<br/>helgen 18.-19. april og 2.-4. mai
 
       </div>
-      <main className="flex flex-col gap-64px] row-start-2 items-center sm:items-start">
+      <main className="flex flex-col gap-64px] row-start-2 items-center">
         <Activities></Activities>
       </main>
 
