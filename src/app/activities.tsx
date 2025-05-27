@@ -58,6 +58,7 @@ export default function Activities( props:any){
               <th>Athlete</th>
               <th>Number of activities</th>
               <th>Score</th>
+              <th>Score (Milsluker)</th>
             </tr>
           </thead>
           <tbody>
@@ -68,6 +69,7 @@ export default function Activities( props:any){
                 <td>{activity.firstname} {activity.lastname}</td>
                 <td>{activity.number_of_activities} </td>
                 <td>{(activity.score).toFixed(2)}</td>
+                <td>{(activity.km_score).toFixed(2)}</td>
               </tr>
             ))}
           </tbody>

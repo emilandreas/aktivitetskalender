@@ -4,6 +4,7 @@ export interface AthleteDisplay{
     username: string;
     img: string;
     score: number;
+    km_score: number;
     number_of_activities:number;
   }
 export interface CompetitionDetails{

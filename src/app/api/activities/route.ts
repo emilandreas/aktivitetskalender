@@ -73,11 +73,13 @@ async function refreshActivityData(){
     const activityData = await fetchStravaActivities(user);
 
     let score = 0;
+    let km_score = 0;
     let total_km = 0;
     let numActivities = activityData.length;
 
     activityData.forEach((a:any) => {
       score += convertToScore(a);
+      km_score += convertToScoreKM(a);
       total_km += a.distance / 1000;
     });
 
@@ -95,6 +97,7 @@ async function refreshActivityData(){
       img: user.profile_img_link,
       number_of_activities: numActivities,
       score: score,
+      km_score: km_score
     } as AthleteDisplay;
   });
 
@@ -232,6 +235,70 @@ function convertToScore(activity: any):number{
     case "WeightTraining":
     case "Workout":
       score = 5;
+      break;
+  }    
+  return score*scale;
+
+}
+function convertToScoreKM(activity: any):number{
+  const dist = activity.distance / 1000;
+  const height = activity.total_elevation_gain/1000;
+  const type = activity.type;
+  const scale = isDoubleDate(activity.start_date_local) ? 2: 1;
+  let score = 0;
+  switch(type){
+    case "Run":
+    case "VirtualRun":
+    case "Elliptical":
+      score = CONVERT.running * dist + height*2;
+      break;
+    case "Walk":
+    case "Hike":
+      score =  CONVERT.walking * dist + height*2;
+      break;
+    case "VirtualRide":
+      score =  CONVERT.virtual_ride*dist;
+      break;
+    case "Ride":
+    case "Mountain Bike Ride":
+    case "Gravel Ride":
+      score = CONVERT.ride*(dist + (height*2) );
+      break;
+    case "EBikeRide":
+      score =  CONVERT.e_ride*dist;
+      break;
+    case "NordicSki":
+    case "RollerSki":
+
+      score =  CONVERT.ski*dist;
+      break;
+    case "Rowing":
+      score = CONVERT.row*dist;
+      break;
+    case "Swim":
+      score = CONVERT.swim*dist;
+      break;
+    case "Canoe":
+    case "Kayaking":
+      score = CONVERT.kayak*dist;
+      break;
+    case "Snowshoe":
+      score = CONVERT.walking*dist;
+      break;
+    case "IceSkate":
+    case "AlpineSki":
+    case "BackcountrySki":
+
+    case "Snowboard":
+    case "Kitesurf":
+   
+    case "StandUpPaddling":
+    case "Surf":
+    case "Windsurf":
+    case "RockClimbing":
+    case "WeightTraining":
+    case "Workout":
+      score = 0;
       break;
   }    
   return score*scale;
