@@ -80,12 +80,13 @@ async function refreshActivityData(){
     let numActivities = activityData.length;
 
     activityData.forEach((a:any) => {
-      score += convertToScore(a);
+      let activityScore = convertToScore(a);
+      score += activityScore;
       km_score += convertToScoreKM(a);
       total_km += a.distance / 1000;
-      if(a.distance/1000 > maxDist){
-        maxDist = a.distance/1000;
-        maxDistName = user.firstname + " " + user.lastname;
+      if(activityScore > maxDist){
+        maxDist = convertToScore(a, false);
+        maxDistName = user.firstname + " " + user.lastname + " (" + a.distance/1000 + ")";
       }
     });
 
@@ -184,11 +185,11 @@ function isDoubleDate(stravaDate: string):boolean{
   return normalizedDates.includes(activityDate);
 }
 
-function convertToScore(activity: any):number{
+function convertToScore(activity: any, enableDoubleDate=true):number{
   const dist = activity.distance / 1000;
   const height = activity.total_elevation_gain/1000;
   const type = activity.type;
-  const scale = isDoubleDate(activity.start_date_local) ? 2: 1;
+  const scale = enableDoubleDate && isDoubleDate(activity.start_date_local) ? 2: 1;
   let score = 0;
   switch(type){
     case "Run":

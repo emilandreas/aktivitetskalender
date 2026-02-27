@@ -48,7 +48,7 @@ export default function Activities( props:any){
         <br></br>
         <div>
         Premieprogresjon [kr]: 0 <progress value={progress()}/> 7500  &nbsp;&nbsp;    
-        Total poengsum: {details?.total_score.toFixed(2)}/15000
+        Total premiesum: {(progress()*7500).toFixed(2)}/15000
         </div>
         <table>
           <thead>
