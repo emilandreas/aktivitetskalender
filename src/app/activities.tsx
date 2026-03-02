@@ -54,14 +54,14 @@ export default function Activities(props: any) {
   return (
     <div className="activities-container">
       <h1 className="header">Leaderboard</h1>
-
+{/* 
       <div className="progress-container">
         <span>Premieprogresjon [kr]</span>
         <progress value={progress()} max={1} />
         <div>
           Total premiesum: {(progress() * 7500).toFixed(2)}/15000
         </div>
-      </div>
+      </div> */}
 
     {/* 🏆 TOP 3 */}
     <div className="card-list">

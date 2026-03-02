@@ -5,8 +5,8 @@ import axios from "axios";
 
 const STRAVA_CLIENT_ID = process.env.STRAVA_CLIENT_ID;
 const STRAVA_CLIENT_SECRET = process.env.STRAVA_CLIENT_SECRET;
-const AFTER_DATE = process.env.STRAVA_ACTIVITIES_AFTER ?? "2025-04-01T00:00:00Z"
-const BEFORE_DATE = process.env.STRAVA_ACTIVITIES_BEFORE ?? "2025-05-11T00:00:00Z"
+const AFTER_DATE = process.env.STRAVA_ACTIVITIES_AFTER ?? "2026-03-01T00:00:00Z"
+const BEFORE_DATE = process.env.STRAVA_ACTIVITIES_BEFORE ?? "2026-05-11T00:00:00Z"
 const INTERVAL: number = +(process.env.STRAVA_FETCH_INTERVAL ?? 1000);
 
 let CACHED_ACTIVITY_DATA: ResponseObject;
@@ -72,6 +72,7 @@ async function refreshActivityData(){
   let all_total_score = 0;
   const athletePromises = res.rows.map(async (user) => {
     let activityData = await fetchStravaActivities(user);
+
     activityData = pruneIfMoreThanTwoActivitiesPrDay(activityData);
 
     let score = 0;
