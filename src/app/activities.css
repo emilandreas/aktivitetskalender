@@ -1,43 +1,139 @@
-/* Table container to center it */
-.table-container {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    height: 100vh; /* Make the table container fill the entire height of the screen */
-    background-color: #f4f4f4; /* Background color for better visibility */
+.activities-container {
+  padding: 20px;
+  max-width: 900px;
+  margin: auto;
+}
+
+.header {
+  text-align: center;
+  font-size: 2rem;
+  margin-bottom: 20px;
+}
+
+.progress-container {
+  text-align: center;
+  margin-bottom: 30px;
+}
+
+progress {
+  width: 100%;
+  height: 18px;
+  margin: 10px 0;
+}
+
+/* ================= PODIUM ================= */
+.podium-card {
+  font-weight: 600;
+  border: 2px solid transparent;
+}
+
+/* Gold */
+.place-1 {
+  background: linear-gradient(135deg, #ffd700, #ffb700) !important;
+  color: #000;
+  border-color: #ffcc00;
+}
+
+/* Silver */
+.place-2 {
+  background: linear-gradient(135deg, #c0c0c0, #a8a8a8) !important;
+  color: #000;
+  border-color: #b0b0b0;
+}
+
+/* Bronze */
+.place-3 {
+  background: linear-gradient(135deg, #cd7f32, #b87333);
+  color: #fff;
+  border-color: #a8652a;
+}
+
+/* ================= CARD LIST ================= */
+
+.card-list {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.athlete-card {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  padding: 15px;
+  border-radius: 12px;
+  background: #1e1e1e;
+  box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+}
+
+.rank {
+  font-weight: bold;
+  font-size: 1.2rem;
+  width: 40px;
+}
+
+.profile-pic {
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+.athlete-info {
+  flex: 1;
+}
+
+.name {
+  font-weight: bold;
+  margin-bottom: 5px;
+}
+
+.stats {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  font-size: 0.9rem;
+  opacity: 0.8;
+}
+
+/* ================= SKELETON ================= */
+
+.skeleton-card,
+.skeleton-podium {
+  background: linear-gradient(
+    90deg,
+    #1e1e1e 25%,
+    #2a2a2a 37%,
+    #1e1e1e 63%
+  );
+  background-size: 400% 100%;
+  animation: shimmer 1.4s ease infinite;
+  border-radius: 12px;
+}
+
+.skeleton-podium {
+  height: 150px;
+  margin-bottom: 30px;
+}
+
+.skeleton-card {
+  height: 80px;
+  margin-bottom: 15px;
+}
+
+@keyframes shimmer {
+  0% { background-position: 100% 0 }
+  100% { background-position: -100% 0 }
+}
+
+/* ================= DESKTOP ================= */
+
+@media (min-width: 768px) {
+  .card-list {
+    gap: 20px;
   }
 
-  .header {
-    font-size: 2em !important;
+  .athlete-card {
+    padding: 20px;
   }
-  
-  table {
-    border-collapse: collapse; /* Ensures that the borders are collapsed together */
-    margin-right: 20px 0; /* Adds some spacing around the table */
-    margin-left: 20px 0; /* Adds some spacing around the table */
-  }
-  .nopad{
-    padding:0;
-  }
-  th, td {
-    padding: 12px 20px; /* Adds padding inside table cells */
-    text-align: center; /* Centers the content inside cells */
-    border: 1px solid #ddd; /* Light gray border for cells */
-  }
-  
-  th {
-    background-color: #c26e00dc; /* Green background for header */
-    color: white; /* White text color for the header */
-  }
-  
-  tr:nth-child(even) {
-    background-color: #2c2c2c; /* Adds alternating row colors for better readability */
-  }
-  
-  tr:hover {
-    background-color: #221900; /* Change the background color when hovering over a row */
-  }
-  .profile-pic{
-    max-height: 50px;
-    background: url("../../public/teleplan_globe_logo.jpg");
-  }
+}

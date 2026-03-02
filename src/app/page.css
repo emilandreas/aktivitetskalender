@@ -1,20 +1,76 @@
-.stravaConnect {
-    position: fixed;
-    left: 30px;
-    top:30px;
-    background-color: orangered;
-    padding-left: 15px;
-    padding-right: 15px;
-    border-radius: 15px;
+/* ================= MOBILE FIRST ================= */
+
+.page-container {
+  padding: 16px;
+  max-width: 1100px;
+  margin: auto;
 }
+
+.top-section {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  margin-bottom: 30px;
+}
+
+/* Strava Button */
+
+.stravaConnect {
+  background-color: orangered;
+  padding: 12px 16px;
+  border-radius: 12px;
+  text-align: center;
+}
+
+.stravaLink {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  font-weight: 600;
+  text-decoration: none;
+  color: white;
+}
+
+/* Info Box */
+
 .infoBox {
+  border: 2px solid white;
+  border-radius: 12px;
+  padding: 16px;
+  font-size: 0.9rem;
+  line-height: 1.4;
+}
+
+/* Main content */
+
+.main-content {
+  width: 100%;
+}
+
+/* ================= DESKTOP ================= */
+
+@media (min-width: 768px) {
+
+  .top-section {
+    position: relative;
+  }
+
+  .stravaConnect {
     position: fixed;
+    top: 30px;
+    left: 30px;
+    width: auto;
+  }
+
+  .infoBox {
+    position: fixed;
+    top: 30px;
     right: 30px;
-    top:30px;
-    border-color: white;
-    border-width: 3px;
-    border-radius: 15px;
-    padding-left: 15px;
-    padding-right: 15px;
-    border-radius: 15px;
+    max-width: 260px;
+  }
+
+  .page-container {
+    padding-top: 100px;
+  }
 }

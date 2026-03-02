@@ -68,11 +68,11 @@ let maxDistName = "";
 
 async function refreshActivityData(){
   const res = await pool.query('SELECT id, firstname, lastname, access_token, refresh_token, expires_at, profile_img_link FROM users');
-  console.log("user: ", res.rows)
   let all_total_km = 0;
   let all_total_score = 0;
   const athletePromises = res.rows.map(async (user) => {
-    const activityData = await fetchStravaActivities(user);
+    let activityData = await fetchStravaActivities(user);
+    activityData = pruneIfMoreThanTwoActivitiesPrDay(activityData);
 
     let score = 0;
     let km_score = 0;
@@ -92,10 +92,6 @@ async function refreshActivityData(){
 
     all_total_km += total_km;
     all_total_score += score;
-
-    if(user.lastname == "UwU" || user.lastname == "Torgersrud"){
-      score += 25;
-    }
 
     return {
       firstname: user.firstname,
@@ -123,7 +119,63 @@ async function refreshActivityData(){
   return responseObj;
 }
 
+function pruneIfMoreThanTwoActivitiesPrDay(activities: any[]): any[] {
+  const activitiesByDay = new Map<string, any[]>();
 
+  for (const activity of activities) {
+    const dayKey = new Date(activity.start_date_local).toISOString().split("T")[0];
+    const list = activitiesByDay.get(dayKey) ?? [];
+    list.push(activity);
+    activitiesByDay.set(dayKey, list);
+  }
+
+  const result: any[] = [];
+
+  for (const dayActivities of activitiesByDay.values()) {
+    if (dayActivities.length <= 2) {
+      result.push(...dayActivities);
+      continue;
+    }
+
+    let top1: any | null = null;
+    let top2: any | null = null;
+
+    for (const activity of dayActivities) {
+      if (!top1 || convertToScore(activity) > convertToScore(top1)) {
+        top2 = top1;
+        top1 = activity;
+      } else if (!top2 || convertToScore(activity) > convertToScore(top2)) {
+        top2 = activity;
+      }
+    }
+
+    if (top1) result.push(top1);
+    if (top2) result.push(top2);
+  }
+
+  return result;
+}
+
+function pickLotteryWinner(participants: Array<AthleteDisplay>): string {
+  const ticketPool: string[] = [];
+
+  for (const participant of participants) {
+    for (let i = 0; i < participant.score; i++) {
+      ticketPool.push(participant.firstname + " " + participant.lastname);
+    }
+  }
+
+  if (ticketPool.length === 0) {
+    throw new Error("No tickets in the lottery.");
+  }
+
+  const randomIndex = Math.floor(Math.random() * ticketPool.length);
+  return ticketPool[randomIndex];
+}
+
+function delay(ms: number) {
+  return new Promise( resolve => setTimeout(resolve, ms) );
+}
 
 export async function GET(request: Request) {
   try {
@@ -143,6 +195,18 @@ export async function GET(request: Request) {
         console.log("Returning new data")
         CACHED_ACTIVITY_DATA  = newData;
         GLOBAL.LAST_FETCH_TIME = now;
+        if(false){
+          const winner = pickLotteryWinner(newData.athleteDisplays);
+          console.log("\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n")
+          console.log("The winner of Aktivitetskalenderen 2025 is: \n");
+          for(let i =0; i < 20; i++){
+              await delay(700);
+            console.log(".");
+          }          
+          console.log("--- " + winner + " ---");
+          console.log("Gratulerer!!");
+
+        }
         return new Response(JSON.stringify(CACHED_ACTIVITY_DATA), {
           status:200,
           headers: { 'Content-Type': 'application/json' }
@@ -195,7 +259,7 @@ function convertToScore(activity: any, enableDoubleDate=true):number{
     case "Run":
     case "VirtualRun":
     case "Elliptical":
-      score = CONVERT.running * dist + height*2;
+      score = CONVERT.running * dist;
       break;
     case "Walk":
     case "Hike":
