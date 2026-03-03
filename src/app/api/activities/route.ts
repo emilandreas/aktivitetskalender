@@ -261,7 +261,7 @@ function convertToScore(activity: any, enableDoubleDate=true):number{
     case "Run":
     case "VirtualRun":
     case "Elliptical":
-      score = CONVERT.running * dist;
+      score = CONVERT.running * dist + height*2;
       break;
     case "Walk":
     case "Hike":
