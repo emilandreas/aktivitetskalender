@@ -240,11 +240,12 @@ function isDoubleDate(stravaDate: string):boolean{
   const activityDate = new Date(stravaDate).toISOString().split("T")[0];
 
   const doubleDates = [
-    "2025-04-01",
-    "2025-04-02",
-    "2025-04-08",
-    "2025-04-26",
-    "2025-05-10",
+    "2026-03-01",
+    "2026-03-08",
+    "2026-04-09",
+    "2026-04-25",
+    "2026-05-8",
+    "2026-05-9",
   ]
   const normalizedDates = doubleDates.map(date => new Date(date).toISOString().split("T")[0]);
   return normalizedDates.includes(activityDate);
