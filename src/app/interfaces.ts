@@ -11,6 +11,7 @@ export interface CompetitionDetails{
     total_km: number;
     total_score: number;
     best_streak_activities: any;
+    best_overall_activity: any;
 }
 export interface ResponseObject{
     athleteDisplays: Array<AthleteDisplay>,

@@ -4,20 +4,22 @@ export type Streak = {
 };
 
 export function findBestActivitiesForStreaks(
-    activities: any[],
+    listOfActivitiyLists: any[],
     streaks: any[],
-    scoreFn: (activity: any) => number
-): (any | null)[] {
-
+    scoreFn: (activity: any) => number, 
+    users: any[]
+): ({period: Streak, user: string, activity: any} | null)[] {
+    const allActivities = listOfActivitiyLists.flat();
     // Sort activities by date once
-    const sortedActivities = activities.sort(
+    const sortedActivities = allActivities.sort(
         (a, b) => new Date(a.start_date_local).getTime() - new Date(b.start_date_local).getTime()
     );
-    // console.log(sortedActivities)
+    console.log("Activities sorted")
     return streaks.map(streak => {
         let bestActivity: any | null = null;
         let bestScore = -Infinity;
         for (const activity of sortedActivities) {
+            if(!activity) continue;
             const date = new Date(activity.start_date_local)
             if (date > streak.end) break;
             if (date < streak.start) continue;
@@ -29,7 +31,9 @@ export function findBestActivitiesForStreaks(
                 bestActivity = activity;
             }
         }
-        
-        return bestActivity;
+        console.log(bestActivity)
+        if(!bestActivity) return {period: streak, user: null, activity: null};
+        const bestActivityUser = users.find(u => u.id == bestActivity.athlete.id)
+        return {period: streak, user: bestActivityUser, activity: bestActivity}
     });
 }

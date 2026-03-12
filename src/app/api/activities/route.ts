@@ -87,58 +87,92 @@ let maxDistName = "";
 
 async function refreshActivityData(){
   const res = await pool.query('SELECT id, firstname, lastname, access_token, refresh_token, expires_at, profile_img_link FROM users');
-  let all_total_km = 0;
-  let all_total_score = 0;
-  var allActivityData: any[] = []
-  const athletePromises = res.rows.map(async (user) => {
-    try{
-      let activityData = await fetchStravaActivities(user);
-      if(!activityData) return null;
+let all_total_km = 0;
+let all_total_score = 0;
+let allActivityData: any[] = [];
 
-      activityData = pruneIfMoreThanTwoActivitiesPrDay(activityData);
-      allActivityData.push(activityData);
-      let score = 0;
-      let km_score = 0;
-      let total_km = 0;
-      let numActivities = activityData.length;
+const athletePromises = res.rows.map(async (user) => {
+  try {
+    let activityData = await fetchStravaActivities(user);
+    if (!activityData) return null;
 
-      activityData.forEach((a:any) => {
-        let activityScore = convertToScore(a);
-        score += activityScore;
-        km_score += convertToScoreKM(a);
-        total_km += a.distance / 1000;
-        if(activityScore > maxDist){
-          maxDist = convertToScore(a, false);
-          maxDistName = user.firstname + " " + user.lastname + " (" + a.distance/1000 + ")";
-        }
-      });
+    activityData = pruneIfMoreThanTwoActivitiesPrDay(activityData);
 
-      all_total_km += total_km;
-      all_total_score += score;
+    let score = 0;
+    let km_score = 0;
+    let total_km = 0;
+    let numActivities = activityData.length;
 
-      return {
-        firstname: user.firstname,
-        lastname: user.lastname,
-        username: user.username,
-        img: user.profile_img_link,
-        number_of_activities: numActivities,
-        score: score,
-        km_score: km_score
-      } as AthleteDisplay;
-    }
-    catch(e: any){
-      console.error(e);
-      return null;
-    }
+    let localMaxDist = 0;
+    let localMaxDistName = "";
+    let localMaxDistActivity = {};
 
-  });
+    activityData.forEach((a: any) => {
+      const activityScore = convertToScore(a);
 
-  const athleteScores: Array<AthleteDisplay> = (await Promise.all(athletePromises)).filter(Boolean) as Array<AthleteDisplay>;
+      score += activityScore;
+      km_score += convertToScoreKM(a);
+      total_km += a.distance / 1000;
+
+      if (activityScore > localMaxDist) {
+        localMaxDist = convertToScore(a, false);
+        localMaxDistActivity = a;
+        localMaxDistName =
+          user.firstname + " " + user.lastname + " (" + a.distance / 1000 + ")";
+      }
+    });
+
+    const athleteDisplay: AthleteDisplay = {
+      firstname: user.firstname,
+      lastname: user.lastname,
+      username: user.username,
+      img: user.profile_img_link,
+      number_of_activities: numActivities,
+      score: score,
+      km_score: km_score,
+    };
+
+    return {
+      athleteDisplay,
+      user,
+      total_km,
+      score,
+      activityData,
+      localMaxDist,
+      localMaxDistActivity,
+      localMaxDistName,
+    };
+  } catch (e: any) {
+    console.error(e);
+    return null;
+  }
+});
+
+const results = (await Promise.all(athletePromises)).filter(Boolean);
+
+let maxDist = 0;
+let maxDistUser = {};
+let maxDistActivity = {};
 
 
+const athleteScores: AthleteDisplay[] = [];
 
-  // const bestStreaksActivities = findBestActivitiesForStreaks(allActivityData, STREAKS, convertToScoreKM);
-  let bestStreaksActivities;
+for (const r of results as any[]) {
+  athleteScores.push(r.athleteDisplay);
+
+  all_total_km += r.total_km;
+  all_total_score += r.score;
+  allActivityData.push(r.activityData);
+
+  if (r.localMaxDist > maxDist) {
+    maxDist = r.localMaxDist;
+    maxDistUser = r.user;
+    maxDistActivity = r.localMaxDistActivity;
+  }
+}
+
+  const users = res.rows;
+  const bestStreaksActivities = findBestActivitiesForStreaks(allActivityData, STREAKS, convertToScoreKM, users );
   console.log("max: " + maxDistName);
   console.log(maxDist)
 
@@ -147,7 +181,9 @@ async function refreshActivityData(){
     details: {
         total_km: all_total_km,
         total_score: all_total_score,
-        best_streak_activities: bestStreaksActivities
+        best_streak_activities: bestStreaksActivities,
+        best_overall_activity: {activity: maxDistActivity, user: maxDistUser}
+
     }
   }
   return responseObj;

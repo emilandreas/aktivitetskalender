@@ -12,6 +12,7 @@
     "@neondatabase/serverless": "^1.0.0",
     "@vercel/postgres": "^0.10.0",
     "axios": "^1.8.4",
+    "dayjs": "^1.11.20",
     "next": "^15.2.2",
     "next-auth": "^4.24.11",
     "pg": "^8.14.1",

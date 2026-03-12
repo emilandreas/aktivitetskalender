@@ -3,6 +3,8 @@ import "./activities.css";
 
 import React, { useEffect, useState } from "react";
 import { AthleteDisplay, CompetitionDetails, ResponseObject } from "./interfaces";
+import { Streak } from "./api/activities/helpers";
+import dayjs from "dayjs"
 
 export default function Activities(props: any) {
   const [scoreboard, setScoreboard] = useState<Array<AthleteDisplay>>([]);
@@ -21,6 +23,8 @@ export default function Activities(props: any) {
 
         setDetails(data.details);
         setScoreboard(scores);
+        console.log("data.details.best_streak_activities: ")
+        console.log(data.details.best_overall_activity)
       } catch (error) {
         console.error("Error fetching activities:", error);
       } finally {
@@ -50,10 +54,48 @@ export default function Activities(props: any) {
 
   const topThree = scoreboard.slice(0, 3);
   const rest = scoreboard.slice(3);
-
+  function printPeriod(p:Streak){
+    console.log("p: ", p)
+    const d1 = dayjs(p.start);
+    const d2 = dayjs(p.end);
+    return d1.format("DD.MM") + " to " + d2.format("DD.MM");
+  }
   return (
+    
+    
     <div className="activities-container">
-      <h1 className="header">Leaderboard</h1>
+      <div className="highlights">
+
+      <h2 className="section-title">Period highscores</h2>
+
+      <div className="highlight-scroll">
+
+      {details?.best_streak_activities.map((item: any, index: any) => item == null ? null : (
+          <div key={index} className="highlight-card">
+            <div className="period">{printPeriod(item.period)}</div>
+
+            <div className="km">
+              {((item.activity?.distance ?? 0)/1000).toFixed?.(2)} km 
+            </div>
+
+            <div className="athlete">
+              {item.user?.firstname} {item.user?.lastname}
+            </div>
+            <div className="date">{item.activity?.type}</div>
+
+          </div>
+        ))}
+      </div>
+      <div className="longest-card">
+        <div className="period">Overall highscore</div>
+        <div className="km">{(((details?.best_overall_activity?.activity?.distance)?? 0)/1000).toFixed(2)} km</div>
+        <div className="athlete">{details?.best_overall_activity?.user?.firstname + " " + details?.best_overall_activity?.user?.lastname}</div>
+        <div className="date">{dayjs(details?.best_overall_activity?.activity?.start_date_local).format("DD.MM")}</div>
+        <div className="date">{details?.best_overall_activity?.activity?.type}</div>
+      </div>
+
+    </div>
+      <h2 className="section-title">Leaderboard</h2>
 {/* 
       <div className="progress-container">
         <span>Premieprogresjon [kr]</span>

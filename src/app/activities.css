@@ -137,3 +137,59 @@ progress {
     padding: 20px;
   }
 }
+.highlights {
+  margin-bottom: 24px;
+}
+
+.section-title {
+  margin-bottom: 10px;
+}
+
+/* horizontal scrolling cards */
+.highlight-scroll {
+  display: flex;
+  gap: 12px;
+  overflow-x: auto;
+  padding-bottom: 6px;
+  scrollbar-width: none;
+}
+
+.highlight-scroll::-webkit-scrollbar {
+  display: none;
+}
+
+.highlight-card {
+  min-width: 140px;
+  background: #121212;
+  border-radius: 12px;
+  padding: 14px;
+  flex-shrink: 0;
+}
+
+.longest-card {
+  background: #121212;
+  border-radius: 12px;
+  padding: 16px;
+  margin-top: 14px;
+  text-align: center;
+}
+
+.period {
+  font-size: 12px;
+  opacity: 0.7;
+}
+
+.km {
+  font-size: 26px;
+  font-weight: bold;
+  margin: 4px 0;
+}
+
+.athlete {
+  font-size: 14px;
+}
+
+.date {
+  font-size: 12px;
+  opacity: 0.6;
+}
