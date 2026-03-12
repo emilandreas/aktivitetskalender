@@ -3,6 +3,9 @@ import { GLOBAL} from "@/app/api/global"
 
 import axios from "axios";
 
+import { Pool } from "pg";
+import { findBestActivitiesForStreaks, Streak } from "./helpers";
+
 const STRAVA_CLIENT_ID = process.env.STRAVA_CLIENT_ID;
 const STRAVA_CLIENT_SECRET = process.env.STRAVA_CLIENT_SECRET;
 const AFTER_DATE = process.env.STRAVA_ACTIVITIES_AFTER ?? "2026-03-01T00:00:00Z"
@@ -11,7 +14,22 @@ const INTERVAL: number = +(process.env.STRAVA_FETCH_INTERVAL ?? 1000);
 
 let CACHED_ACTIVITY_DATA: ResponseObject;
 
-import { Pool } from "pg";
+// Time periods to compete for longest distance activities
+const STREAKS: Streak[] = [
+    {
+    start: new Date("2026-03-01"),
+    end: new Date("2026-03-03")
+  },
+  {
+    start: new Date("2026-03-19"),
+    end: new Date("2026-03-22")
+  },
+  {
+    start: new Date("2026-04-02"),
+    end: new Date("2026-04-05")
+  }
+]
+
 
 const pool = new Pool({
   connectionString: process.env.DATABASE_URL,
@@ -60,7 +78,8 @@ async function fetchStravaActivities(user:User) {
     });
     return response.data;
   } catch (error:any) {
-    console.error(`Failed to fetch activities for user ${user.id}:`, error.response?.data || error.message);
+    console.error(`Failed to fetch activities for user ${user.firstname} ${user.lastname}:`, error.response?.data || error.message);
+    return null;
   }
 }
 let maxDist = 0;
@@ -70,43 +89,56 @@ async function refreshActivityData(){
   const res = await pool.query('SELECT id, firstname, lastname, access_token, refresh_token, expires_at, profile_img_link FROM users');
   let all_total_km = 0;
   let all_total_score = 0;
+  var allActivityData: any[] = []
   const athletePromises = res.rows.map(async (user) => {
-    let activityData = await fetchStravaActivities(user);
+    try{
+      let activityData = await fetchStravaActivities(user);
+      if(!activityData) return null;
 
-    activityData = pruneIfMoreThanTwoActivitiesPrDay(activityData);
+      activityData = pruneIfMoreThanTwoActivitiesPrDay(activityData);
+      allActivityData.push(activityData);
+      let score = 0;
+      let km_score = 0;
+      let total_km = 0;
+      let numActivities = activityData.length;
 
-    let score = 0;
-    let km_score = 0;
-    let total_km = 0;
-    let numActivities = activityData.length;
+      activityData.forEach((a:any) => {
+        let activityScore = convertToScore(a);
+        score += activityScore;
+        km_score += convertToScoreKM(a);
+        total_km += a.distance / 1000;
+        if(activityScore > maxDist){
+          maxDist = convertToScore(a, false);
+          maxDistName = user.firstname + " " + user.lastname + " (" + a.distance/1000 + ")";
+        }
+      });
 
-    activityData.forEach((a:any) => {
-      let activityScore = convertToScore(a);
-      score += activityScore;
-      km_score += convertToScoreKM(a);
-      total_km += a.distance / 1000;
-      if(activityScore > maxDist){
-        maxDist = convertToScore(a, false);
-        maxDistName = user.firstname + " " + user.lastname + " (" + a.distance/1000 + ")";
-      }
-    });
+      all_total_km += total_km;
+      all_total_score += score;
 
-    all_total_km += total_km;
-    all_total_score += score;
+      return {
+        firstname: user.firstname,
+        lastname: user.lastname,
+        username: user.username,
+        img: user.profile_img_link,
+        number_of_activities: numActivities,
+        score: score,
+        km_score: km_score
+      } as AthleteDisplay;
+    }
+    catch(e: any){
+      console.error(e);
+      return null;
+    }
 
-    return {
-      firstname: user.firstname,
-      lastname: user.lastname,
-      username: user.username,
-      img: user.profile_img_link,
-      number_of_activities: numActivities,
-      score: score,
-      km_score: km_score
-    } as AthleteDisplay;
   });
 
-  const athleteScores: Array<AthleteDisplay> = (await Promise.all(athletePromises)).filter(Boolean);
+  const athleteScores: Array<AthleteDisplay> = (await Promise.all(athletePromises)).filter(Boolean) as Array<AthleteDisplay>;
 
+
+
+  // const bestStreaksActivities = findBestActivitiesForStreaks(allActivityData, STREAKS, convertToScoreKM);
+  let bestStreaksActivities;
   console.log("max: " + maxDistName);
   console.log(maxDist)
 
@@ -114,7 +146,8 @@ async function refreshActivityData(){
     athleteDisplays: athleteScores,
     details: {
         total_km: all_total_km,
-        total_score: all_total_score
+        total_score: all_total_score,
+        best_streak_activities: bestStreaksActivities
     }
   }
   return responseObj;
